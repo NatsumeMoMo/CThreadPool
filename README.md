@@ -1,2 +1,2 @@
 # C-ThreadPool
-Thread pools written in C. (Practice projects)
+Windows API thread pools written in C. (Practice projects)
