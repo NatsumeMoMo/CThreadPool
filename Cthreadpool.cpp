@@ -288,6 +288,8 @@ DWORD ThreadMangerFunction(LPVOID laParam){
 
         //销毁线程
         if(WorkingThreadnum*2<liveThreadnum && liveThreadnum>pool->MinThreadnum){
+            if(WorkingThreadnum<0)
+                break;
             printf("Prepare to destroy thread\n");
             EnterCriticalSection(&pool->mutexPool);
             pool->NeedtoKillnum=PerThreadnum;
@@ -427,7 +429,7 @@ int main()
     }
     //销毁线程之前，工作线程有可能没有执行完毕，因此让主线程睡眠一段时间
 
-    sleep(10);
+    sleep(30);
     destoryThreadPool(pool);
     printf("shutdown ThreadPool safely\n");
     return 0;
