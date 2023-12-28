@@ -298,10 +298,10 @@ DWORD ThreadMangerFunction(LPVOID laParam)
         }
 
         // 销毁线程
-        if (WorkingThreadnum * 2 < liveThreadnum && liveThreadnum > pool->MinThreadnum)
+        if (WorkingThreadnum>0&& WorkingThreadnum * 2 < liveThreadnum && liveThreadnum > pool->MinThreadnum)
         {
-            if (WorkingThreadnum < 0)
-                break;
+            // if (WorkingThreadnum < 0)
+            //     break;
             printf("Prepare to destroy thread\n");
             EnterCriticalSection(&pool->mutexPool);
             pool->NeedtoKillnum = PerThreadnum;
@@ -318,6 +318,7 @@ DWORD ThreadMangerFunction(LPVOID laParam)
         }
         LeaveCriticalSection(&pool->mutexPool);
     }
+    return 1;
 }
 // 线程退出函数
 void threadExit(Cthreadpool *pool)
@@ -350,16 +351,17 @@ int destoryThreadPool(Cthreadpool *pool)
     pool->IsDestoryPool = 1;
     // 唤醒所有的工作线程和管理者线程
     WakeAllConditionVariable(&pool->isTaskEmpty);
-
+    printf("1\n");
     // 等待工作线程执行结束后自毁
     WaitForMultipleObjects(pool->liveThreadnum, pool->ThreadWorkers, TRUE, INFINITE);
-
+    sleep(10);
     // 关闭所有线程的句柄
     for (int i = 0; i < pool->liveThreadnum; i++)
     {
         CloseHandle(pool->ThreadWorkers[i]);
     }
     CloseHandle(pool->ThreadManger);
+    printf("2\n");
     // 释放堆内存
     if (pool->TaskQueue)
     {
@@ -375,6 +377,7 @@ int destoryThreadPool(Cthreadpool *pool)
     }
 
     // 释放互斥锁
+    printf("3\n");
     DeleteCriticalSection(&pool->mutexPool);
     DeleteCriticalSection(&pool->mutexWorkingnum);
     /*
@@ -383,6 +386,7 @@ int destoryThreadPool(Cthreadpool *pool)
     不使用它就可以了。没有 `DeleteConditionVariable()` 或类似的函数是因为 Windows API
     设计条件变量时，并没有为其分配资源，因此也不需要释放资源。
     */
+   printf("4\n");
     free(pool);
     pool = NULL;
     return 1;
